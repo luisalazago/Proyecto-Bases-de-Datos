@@ -3,8 +3,8 @@
 CREATE TABLE Usuario (
 	idUsuario NUMBER(10) PRIMARY KEY,
 	nombre CHAR(50) NOT NULL,
+    correo CHAR(30) UNIQUE NOT NULL,
 	contrasegna CHAR(30) NOT NULL,
-	correo CHAR(30) UNIQUE NOT NULL,
 	edad NUMBER(2) NOT NULL,
 	ubicacion CHAR(20) NOT NULL,
 	tipo CHAR(15) NOT NULL
@@ -49,13 +49,14 @@ CREATE TABLE Transacciones (
 );
 
 CREATE TABLE MetodosPago (
-    idTransaccion NUMBER(10) PRIMARY KEY,
+    idTransaccion NUMBER(10),
     idTarjeta NUMBER(16),
     idAplicacion NUMBER(20),
     precio NUMBER(6) NOT NULL REFERENCES Transacciones,
     FOREIGN KEY(idTarjeta) REFERENCES Tarjeta(idTipo),
     FOREIGN KEY(idAplicacion) REFERENCES Aplicacion(idTipo),
-    FOREIGN KEY(idTransaccion) REFERENCES Transacciones(idTransaccion)
+    FOREIGN KEY(idTransaccion) REFERENCES Transacciones(idTransaccion),
+    CONSTRAINT PK_C PRIMARY KEY(idTransaccion, idTarjeta, idAplicacion)
 );
 
 CREATE TABLE Consume (
