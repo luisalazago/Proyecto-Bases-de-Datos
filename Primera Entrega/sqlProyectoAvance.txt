@@ -1,0 +1,43 @@
+CREATE TABLE Tarjeta (
+idTipo NUMBER(16) PRIMARY KEY,
+nombre VARCHAR(50) UNIQUE NOT NULL,
+numero NUMBER(16) UNIQUE NOT NULL,
+fechaVigencia DATE UNIQUE NOT NULL,
+CCV NUMBER(3) UNIQUE NOT NULL,
+Cuotas NUMBER(3) UNIQUE NOT NULL);
+
+CREATE TABLE Transacciones (
+idTransaccion NUMBER(10) PRIMARY KEY,
+codigoVerificacion NUMBER(6) UNIQUE NOT NULL,
+comprobante NUMBER(6) UNIQUE NOT NULL,
+Fecha DATE NOT NULL,
+precio NUMBER(6) NOT NULL);
+
+CREATE TABLE MetodosPago (
+idTransaccion NUMBER(10) PRIMARY KEY,
+idTarjeta NUMBER(16) UNIQUE NOT NULL,
+idAplicacion NUMBER(20) UNIQUE NOT NULL,
+precio NUMBER(6) NOT NULL,
+FOREIGN KEY(idTarjeta) REFERENCES Tarjeta(idTipo),
+FOREIGN KEY(idAplicacion) REFERENCES Aplicacion(idTipo),
+FOREIGN KEY(idTransaccion) REFERENCES Transacciones);
+
+CREATE TABLE Producto(
+idJuego NUMBER(10) PRIMARY KEY,
+titulo VARCHAR(40) NOT NULL,
+genero VARCHAR(20) NOT NULL,
+descripcion VARCHAR(60) NOT NULL,
+precio NUMBER(6) NOT NULL,
+restriccionEdad NUMBER(2) NOT NULL
+);
+
+CREATE TABLE Ofrece(
+idJuego NUMBER(10) REFERENCES Producto(idJuego),
+idServicio NUMBER(10) REFERENCES Servicios(idServicio),
+cantidadHoras NUMBER(3) NOT NULL,
+categoriaEdad NUMBER(2) NOT NULL,
+cantidadCompras NUMBER(6) NOT NULL,
+biblioteca NUMBER(10) NOT NULL
+PRIMARY KEY(idJuego, idServicio));
+);
+
