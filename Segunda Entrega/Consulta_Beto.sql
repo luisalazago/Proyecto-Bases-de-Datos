@@ -6,25 +6,15 @@ que compraron más de 3 juegos en el último mes.
 */
 
 ALTER TABLE Usuario
-ADD descuento_porcentaje NUMBER(3) DEFAULT 1;
+ADD descuento_porcentaje NUMBER(3) DEFAULT 2;
 
 UPDATE usuario
 SET descuento_porcentaje = descuento_porcentaje + (descuento_porcentaje * 3) / 100
-WHERE idusuario IN (SELECT usuario.idusuario
-	   				FROM usuario INNER JOIN consume 
-                    ON(usuario.idusuario = consume.idusuario) INNER JOIN transacciones
-                    ON(consume.idtransaccion = transacciones.idtransaccion)
+WHERE idusuario IN (SELECT idusuario
+	   				FROM usuario NATURAL JOIN consume NATURAL JOIN transacciones
 	   				WHERE EXTRACT(MONTH FROM fecha) = 5 AND EXTRACT(YEAR FROM fecha) = 2022
-	   				GROUP BY usuario.idusuario
+	   				GROUP BY idusuario
 	   				HAVING(COUNT(idjuego) > 3));
-
-SELECT usuario.idusuario
-	   				FROM usuario INNER JOIN consume 
-                    ON(usuario.idusuario = consume.idusuario) INNER JOIN transacciones
-                    ON(consume.idtransaccion = transacciones.idtransaccion)
-	   				WHERE EXTRACT(MONTH FROM fecha) = 5 AND EXTRACT(YEAR FROM fecha) = 2022
-	   				GROUP BY usuario.idusuario
-	   				HAVING(COUNT(idjuego) > 3);
 
 /*
 4. Listar el promedio, la moda y la desviación estándar del precio de venta de los
