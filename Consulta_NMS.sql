@@ -77,7 +77,7 @@ USING(idJuego);
 
 --9 Actualice los datos y escriba una sentencia para encontrar los números de teléfono que no tienen el formato
 
-SELECT *
+SELECT telefono
 FROM Usuario
 WHERE NOT REGEXP_LIKE (telefono, '^\(\d{2}\)(\s+)\d{3}(\s+)-\d{7}$');
 
