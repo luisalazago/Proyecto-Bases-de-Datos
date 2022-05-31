@@ -15,12 +15,16 @@ DECLARE
 BEGIN
 	CASE
 		WHEN INSERTING THEN
+			/* Primero verifica que el juego puede ser consumido,
+			   es decir, que esté en la tabla de consumo.*/
 			SELECT idtransaccion INTO consu
 			FROM producto INNER JOIN consume
 			ON(producto.idjuego = consume.idjuego)
 			WHERE :NEW.idjuego = producto.idjuego;
 
 			IF consu != 0 THEN
+				/* Una vez verificado que se pude consumir, se verifica
+				   que la compra exista y sea correcta.*/
 				SELECT transacciones.idtransaccion INTO trans
 				FROM transacciones INNER JOIN consume
 				ON(transacciones.idtransaccion = consume.idtransaccion)
@@ -29,25 +33,17 @@ BEGIN
 				IF trans != 0 THEN
 					UPDATE Usuario
 					SET NumeroJuegos = NumeroJuegos + 1;
-				ELSE
-					Raise_application_error(20000, 'El juego: '||:NEW.idjuego||', aun no ha sido comprado.');
 				END IF;
-			ELSE
-				Raise_application_error(20000, 'El juego: '||:NEW.idjuego||', aun no ha sido comprado.');
 			END IF;
 			
 		WHEN DELETING THEN
-			SELECT idtransaccion INTO consu
-			FROM producto INNER JOIN consume
-            ON(producto.idjuego = consume.idjuego)
-			WHERE :OLD.idjuego = producto.idjuego;
+			UPDATE Usuario
+			SET NumeroJuegos = NumeroJuegos - 1;
 
-			IF consu = 0 THEN
-				UPDATE Usuario
-				SET NumeroJuegos = NumeroJuegos - 1;
-			ELSE
-				Raise_application_error(-20000, 'El juego: '||:OLD.idjuego||', aun sigue agregado.');
-			END IF;
+			/* Se elimina la posibilidad de consumir el juego nuevamente,
+			   cuando se cancela o se devuelve.*/
+			DELETE FROM consume
+			WHERE :OLD.idjuego = idjuego AND :OLD.idusuario = idusuario;
 	END CASE;
 END;
 
@@ -56,4 +52,23 @@ END;
 que requiera manejo transaccional y de excepciones. Implemente esa funcionalidad en
 su base de datos.
 */
+
+CREATE OR REPLACE PROCEDURE agregarInterfazUsuario(juego NUMBER, identificacion NUMBER) AS
+BEGIN
+	/* Este procedimiento permite agregar tanto a la biblioteca como a los favoritos
+	   los juegos que les pertenecen.*/
+	BEGIN
+		SAVEPOINT cero;
+		INSERT INTO favoritos
+		VALUES(identificacion, juego);
+		EXCEPTION WHEN NO_DATA_FOUND THEN ROLLBACK TO cero;
+	END;
+
+	BEGIN
+		SAVEPOINT uno;
+		INSERT INTO Biblioteca
+		VALUES(identificacion, juego);
+		EXCEPTION WHEN NO_DATA_FOUND THEN ROLLBACK TO uno;
+	END;
+END;
 
